@@ -12,43 +12,33 @@
 		<style type="text/css">
 			#first {
 				position:absolute;
-
 				top:10px;
 				left:10px;
-
 				background-color:#3E8AB7;
 			}
-			
+
 			#second {
 				position:absolute;
-
 				top:10px;
 				left:120px;
-
 				background-color:#8667BC;
 			}
-			
+
 			#third {
 				position:absolute;
-
 				top:120px;
 				left:10px;
-
 				background-color:#8AB73E;
 			}
-			
+
 			#fourth {
 				position:absolute;
-
 				top:120px;
 				left:120px;
-
 				background-color:#B76B3E;
 			}
-
 			.draggable {
 				cursor:pointer;
-
 				width:100px;
 				height:100px;
 			}
@@ -60,12 +50,55 @@
 		<div id="third" class="draggable"></div>
 		<div id="fourth" class="draggable"></div>
 
+
 		<script type="text/javascript">
 			var socket = io.connect('http://localhost:8080/'); // do not change this line
 
+			var objectData = { id:'', left:0, top:0, color:0 };
+			var draggable = false;  // global flag!
+			var mLeft;
+			var mTop;
+			var objColor;
+
 			// when dragging an element around, send a drag event to the server containing the id of the element and the new left as well as the new right position
 
+			jQuery('.draggable').on('mousedown', function(e) {
+				draggable = true; 		//set global flag
+				mLeft = e.pageX - $(this).offset().left;
+				mTop  = e.pageY - $(this).offset().top;
+				objColor = $(this).css('backgroundColor');
+				console.log('color is: ' + objColor);
+				} );
+
+			jQuery(document)
+			  .on('mousemove', function(e) {
+				  if(draggable === true) {
+					  if (objColor === 'rgb(62, 138, 183)') {objectData.id = 'first';}
+					  else if (objColor === 'rgb(134, 103, 188)') {objectData.id = 'second';}
+					  else if (objColor === 'rgb(138, 183, 62)') {objectData.id = 'third';}
+					  else {objectData.id = 'fourth';}
+
+					  objectData.top = e.pageY-mTop;
+					  objectData.left = e.pageX- mLeft;
+					  objectData.color = objColor;
+
+					  socket.emit('drag', objectData );
+				  }
+			});
+
+			jQuery(document).on('mouseup', function() {
+				draggable = false;
+			});
+
 			// when receiving a drag event from the server, use the contaianed id and the left as well as right position to update the associated element
+			socket.on('drag', function(objectData) {
+				console.log('object - id: ' + objectData.id + ', left: ' + objectData.left + ', top: ' + objectData.top + ', color: ' + objectData.color);
+
+				// use id, left and top to set position of specific id element.
+				jQuery('#'+ objectData.id)
+					.offset({ top: objectData.top, left: objectData.left })
+				});
+
 		</script>
 	</body>
 </html>

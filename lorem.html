@@ -8,6 +8,7 @@
 		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
 
 		<script type="text/javascript" src="http://localhost:8080/socket.io/socket.io.js"></script>
+
 	</head>
 	<body>
 		<pre id="output"></pre>
@@ -15,8 +16,18 @@
 		<script type="text/javascript">
 			var socket = io.connect('http://localhost:8080/'); // do not change this line
 
-			// when receiving a message event from the server, append the timestamp and the message to the output element
-			// for example, it should append '123: test\n' when receiving { 'timestamp':123, 'message':'test' } as the event data
+			// When receiving a message event from the server, append the timestamp
+			//   and the message to the output element.
+			// For example, it should append '123: test\n' when receiving
+			//	 { 'timestamp':123, 'message':'test' } as the event data
+
+			socket.on('message', function(data) {
+				console.log( 'parse: \n' + JSON.parse( JSON.stringify(data) ) );
+				var jObj = JSON.parse( JSON.stringify(data) );
+
+				$('#output').append(jObj.timestamp + ': ' + jObj.message + '\n');
+			});
+
 		</script>
 	</body>
 </html>
